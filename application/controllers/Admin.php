@@ -233,24 +233,8 @@ class Admin extends BaseController
      */
     function djsListing()
     {   
-            $searchText = $this->security->xss_clean($this->input->post('searchText'));
-            $data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->user_model->userListingCount($searchText);
-
-			$returns = $this->paginationCompress ( "userListing/", $count, 10 );
-            
-            $data['userRecords'] = $this->user_model->userListing($searchText, $returns["page"], $returns["segment"]);
-            
-            $process = 'User List';
-            $processFunction = 'Admin/userListing';
-            $this->logrecord($process,$processFunction);
-
-            $this->global['pageTitle'] = 'BSEU : User List';
-            
-            $this->loadViews("users", $this->global, $data, NULL);
+        $data = [];
+        $this->loadViews("djs/djs", $this->global, $data, NULL);
     }
 
 
@@ -312,7 +296,7 @@ class Admin extends BaseController
             // else
             {
                 $name = ucwords(strtolower($this->security->xss_clean($this->input->post('fname'))));
-                $venue_name = $this->security->xss_clean($this->input->post('venue_name'));
+                $venue_name = $this->security->xss_clean($this->input->post('venues_name'));
                 $instagram_user_info = $this->input->post('instagram_user_info');
                 $facebook_user_info = $this->input->post('facebook_user_info');
                 $resident_advisor_id = $this->security->xss_clean($this->input->post('resident_advisor_id'));
@@ -336,7 +320,7 @@ class Admin extends BaseController
                     $this->session->set_flashdata('error', 'Venue creation failed');
                 }
                 
-                redirect('venueListing');
+                redirect('venuesListing');
             }
         }
 
@@ -344,80 +328,70 @@ class Admin extends BaseController
      * This function is used load user edit information
      * @param number $userId : Optional : This is user id
      */
-    function editOldVenue($userId = NULL)
+    function showEditVenueForm($venuesId = NULL)
     {
-            if($userId == null)
+            if($venuesId == null)
             {
-                redirect('userListing');
+                redirect('venuesListing');
             }
             
-            $data['roles'] = $this->user_model->getUserRoles();
-            $data['userInfo'] = $this->user_model->getUserInfo($userId);
+            // $data['roles'] = $this->venues_model->getUserRoles();
+            $data['venuesInfo'] = $this->venues_model->getVenueInfo($venuesId);
 
-            $this->global['pageTitle'] = 'BSEU : Edit User';
+            $this->global['pageTitle'] = 'BSEU : Edit Venue';
             
-            $this->loadViews("user/editOld", $this->global, $data, NULL);
+            $this->loadViews("venues/editVenueForm", $this->global, $data, NULL);
     }
 
 
     /**
-     * This function is used to edit the user informations
+     * This function is used to edit the venue informations
      */
     function editVenue()
     {
+
             $this->load->library('form_validation');
             
-            $userId = $this->input->post('userId');
+            $venuesId = $this->input->post('venuesId');
+    
+            // $this->form_validation->set_rules('fname','Full Name','trim|required|max_length[128]');
+            // $this->form_validation->set_rules('email','Email','trim|required|valid_email|max_length[128]');
+            // $this->form_validation->set_rules('password','Password','matches[cpassword]|max_length[20]');
+            // $this->form_validation->set_rules('cpassword','Confirm Password','matches[password]|max_length[20]');
+            // $this->form_validation->set_rules('role','Role','trim|required|numeric');
+            // $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
             
-            $this->form_validation->set_rules('fname','Full Name','trim|required|max_length[128]');
-            $this->form_validation->set_rules('email','Email','trim|required|valid_email|max_length[128]');
-            $this->form_validation->set_rules('password','Password','matches[cpassword]|max_length[20]');
-            $this->form_validation->set_rules('cpassword','Confirm Password','matches[password]|max_length[20]');
-            $this->form_validation->set_rules('role','Role','trim|required|numeric');
-            $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
-            
-            if($this->form_validation->run() == FALSE)
+            // if($this->form_validation->run() == FALSE)
+            // {
+            //     $this->editOld($userId);
+            // }
+            // else
             {
-                $this->editOld($userId);
-            }
-            else
-            {
-                $name = ucwords(strtolower($this->security->xss_clean($this->input->post('fname'))));
-                $email = $this->security->xss_clean($this->input->post('email'));
-                $password = $this->input->post('password');
-                $roleId = $this->input->post('role');
-                $mobile = $this->security->xss_clean($this->input->post('mobile'));
+                $venues_name = $this->security->xss_clean($this->input->post('venues_name'));
+                $instagram_user_info = $this->input->post('instagram_user_info');
+                $facebook_user_info = $this->input->post('facebook_user_info');
+                $resident_advisor_id = $this->security->xss_clean($this->input->post('resident_advisor_id'));
+                $ig_location_id = $this->input->post('ig_location_id');
+
+                $venuesInfo = array('venues_name'=>$venues_name, 'instagram_user_info'=>$instagram_user_info, 'facebook_user_info'=>$facebook_user_info, 'resident_advisor_id'=> $resident_advisor_id,
+                'ig_location_id'=>$ig_location_id);
                 
-                $userInfo = array();
-                
-                if(empty($password))
-                {
-                    $userInfo = array('email'=>$email, 'roleId'=>$roleId, 'name'=>$name,
-                                    'mobile'=>$mobile, 'status'=>0, 'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
-                }
-                else
-                {
-                    $userInfo = array('email'=>$email, 'password'=>getHashedPassword($password), 'roleId'=>$roleId,
-                        'name'=>ucwords($name), 'mobile'=>$mobile,'status'=>0, 'updatedBy'=>$this->vendorId, 
-                        'updatedDtm'=>date('Y-m-d H:i:s'));
-                }
-                
-                $result = $this->user_model->editUser($userInfo, $userId);
+                $result = $this->venues_model->editVenue($venuesInfo, $venuesId);
                 
                 if($result == true)
                 {
-                    $process = 'User Update';
-                    $processFunction = 'Admin/editUser';
+                    $process = 'Venue Update';
+                    $processFunction = 'Admin/editVenue';
                     $this->logrecord($process,$processFunction);
 
-                    $this->session->set_flashdata('success', 'User successfully updated');
+                    $this->session->set_flashdata('success', 'Venue successfully updated');
                 }
                 else
                 {
-                    $this->session->set_flashdata('error', 'User update failed');
+                    $this->session->set_flashdata('error', 'Venue update failed');
                 }
                 
-                redirect('userListing');
+                redirect('venuesListing');
             }
     }
 
@@ -427,16 +401,16 @@ class Admin extends BaseController
      */
     function deleteVenue()
     {
-            $userId = $this->input->post('userId');
-            $userInfo = array('isDeleted'=>1,'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
-            
-            $result = $this->user_model->deleteUser($userId, $userInfo);
+            $venuesId = $this->input->post('venuesId');
+            // $userInfo = array('isDeleted'=>1,'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
+        
+            $result = $this->venues_model->deleteVenue($venuesId);
             
             if ($result > 0) {
                  echo(json_encode(array('status'=>TRUE)));
 
-                 $process = 'Deleting a User';
-                 $processFunction = 'Admin/deleteUser';
+                 $process = 'Deleting a Venue';
+                 $processFunction = 'Admin/deleteVenue';
                  $this->logrecord($process,$processFunction);
 
                 }
@@ -448,24 +422,44 @@ class Admin extends BaseController
      */
     function eventsListing()
     {   
-            $searchText = $this->security->xss_clean($this->input->post('searchText'));
-            $data['searchText'] = $searchText;
-            
-            $this->load->library('pagination');
-            
-            $count = $this->user_model->userListingCount($searchText);
+        $data = [];
+        $this->loadViews("events/events", $this->global, $data, NULL);
+    }
 
-			$returns = $this->paginationCompress ( "userListing/", $count, 10 );
-            
-            $data['userRecords'] = $this->user_model->userListing($searchText, $returns["page"], $returns["segment"]);
-            
-            $process = 'User List';
-            $processFunction = 'Admin/userListing';
-            $this->logrecord($process,$processFunction);
 
-            $this->global['pageTitle'] = 'BSEU : User List';
-            
-            $this->loadViews("users", $this->global, $data, NULL);
+    function getStories()
+    {
+        
+        // $location_id = 'the_location_id_of_the_venue_instagram';
+        $location_id = '218435836';
+        $session_id = '30561969329%3A1qo3IHMa4WxrQd%3A6';
+        $url = 'https://stevesie.com/cloud/api/v1/endpoints/bf081b41-5f87-47c9-8116-d20713ae10b8/executions';
+        $params = '{
+            "inputs": {
+                "location_id": "'.$location_id .'",
+                "session_id": "'.$session_id.'"
+            },
+            "proxy": {
+            "type": "custom",
+            "url": "lum-customer-domix-zone-zone4:i7axramu62v9@zproxy.lum-superproxy.io:22225"
+            },
+            "format": "json"
+        }';
+
+        $defaults = array(
+        CURLOPT_URL => $url,
+        CURLOPT_POSTFIELDS => $params,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_HTTPHEADER => array('Token: 4ff70330-44d4-433b-b411-550c77900263',
+        'Content-Type: application/json')
+        );
+        $ch = curl_init();
+        curl_setopt_array($ch, $defaults);
+        $output = curl_exec($ch);     
+        $data['instagramStories'] = json_decode($output);
+        // $data['instagramStories'] = $output;
+        
+        $this->loadViews("scrap_stories/stories", $this->global, $data, NULL);
     }
 
      /**

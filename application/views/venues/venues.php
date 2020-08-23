@@ -8,7 +8,13 @@
     </section>
     <section class="content">
         <div class="row">
-            <div class="col-xs-12 text-right">
+            <div class="col-xs-6 text-right">
+                <div class="form-group">
+                    <a class="btn btn-primary" href="<?php echo base_url(); ?>getInstagramStories">
+                        <i class="fa fa-plus"></i> Scrapping</a>
+                </div>
+            </div>
+            <div class="col-xs-6 text-right">
                 <div class="form-group">
                     <a class="btn btn-primary" href="<?php echo base_url(); ?>showAddVenueForm">
                         <i class="fa fa-plus"></i> Add Venue</a>
@@ -84,10 +90,10 @@
                                         <?php echo $record->ig_location_id ?>
                                     </td>
                                     <td class="text-center">
-                                        <a class="btn btn-sm btn-info" href="<?php echo base_url().'editOld/'.$record->venuesId; ?>" title="Edit">
+                                        <a class="btn btn-sm btn-info" href="<?php echo base_url().'showEditVenueForm/'.$record->venuesId; ?>" title="Edit">
                                             <i class="fa fa-pencil"></i>
                                         </a>
-                                        <a class="btn btn-sm btn-danger deleteUser" href="#" data-userid="<?php echo $record->venuesId; ?>" title="Delete">
+                                        <a class="btn btn-sm btn-danger deleteVenue1" id="deleteVenue1" href="#" data-venuesid="<?php echo $record->venuesId; ?>" title="Delete">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </td>

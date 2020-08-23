@@ -71,17 +71,37 @@ class Venues_model extends CI_Model
      * @param number $userId : This is user id
      * @return array $result : This is user information
      */
-    function getUserInfo($userId)
+    function getVenueInfo($venuesId)
     {
-        $this->db->select('userId, name, email, mobile, roleId');
-        $this->db->from('tbl_users');
-        $this->db->where('isDeleted', 0);
-        $this->db->where('userId', $userId);
+        $this->db->select('venuesId, venues_name, instagram_user_info, facebook_user_info, resident_advisor_id, ig_location_id');
+        $this->db->from('tbl_venues');
+        // $this->db->where('isDeleted', 0);
+        $this->db->where('venuesId', $venuesId);
         $query = $this->db->get();
         
         return $query->result();
     }
-    
+
+    function editVenue($venuesInfo, $venuesId)
+    {
+        $this->db->where('venuesId', $venuesId);
+        $this->db->update('tbl_venues', $venuesInfo);
+        
+        return TRUE;
+    }
+
+        /**
+     * This function is used to delete the user information
+     * @param number $userId : This is user id
+     * @return boolean $result : TRUE / FALSE
+     */
+    function deleteVenue($venuesId)
+    {
+        $this->db->where('venuesId', $venuesId);
+        $this->db->delete('tbl_venues');
+        
+        return $this->db->affected_rows();
+    }
 
 }
 

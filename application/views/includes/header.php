@@ -153,6 +153,12 @@
                 </a>
               </li>
               <li class="treeview">
+                <a href="<?php echo base_url(); ?>getInstagramStories">
+                  <i class="fa fa-archive"></i>
+                  <span>Stories</span>
+                </a>
+              </li>
+              <li class="treeview">
                 <a href="<?php echo base_url(); ?>djsListing">
                   <i class="fa fa-archive"></i>
                   <span>DJs</span>
